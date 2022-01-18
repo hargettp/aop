@@ -166,6 +166,7 @@ Note that for each of these, there are internal objects or terms used to describ
   * `::predicate(Name/Arity)` - Utility method, combinging `name` and `arity`
 * `::method(Method)` - Iterates over the methods defined on the receiver
 * `::apply(Partial, Args)` - Constructs a full message by adding `Args` onto the end of the argument list in `Partial`, and then invoking the created message on the receiver
+* `::listing`, `::listing(MethodName)`, or`::listing(MethodPattern)` - Lists clauses of methods defined on the receiver
 
 ## Assertions
 

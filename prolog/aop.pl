@@ -25,3 +25,48 @@ use_aspect(Aspect) :-
 % Built-in aspects
 :- use_module('./assertions').
 :- use_module('./reflection').
+
+:- new_aspect(aop).
+
+  :- in_object(_Any).
+
+    listing :-
+      ::listing(_).
+
+    listing(MethodName) :-
+      atom(MethodName),
+      !,
+      ::this(This),
+      findall(
+        Clause,
+        (
+          clause(aop:perform_method(This, Method), Body),
+          functor(Method, MethodName, _Arity),
+          Clause = (Method :- Body)
+          ),
+        Clauses
+        ),
+      ::portray_method_clauses(Clauses).
+
+    listing(MethodPattern) :-
+      ::this(This),
+      findall(
+        Clause,
+        (
+          clause(aop:perform_method(This, Method), Body),
+          MethodPattern = Method,
+          Clause = (Method :- Body)
+          ),
+        Clauses
+        ),
+      ::portray_method_clauses(Clauses).
+
+    portray_method_clauses(Clauses) :-
+      forall(
+        member(Clause, Clauses),
+        portray_clause(Clause)
+        ).
+
+  :- end_object.
+
+:- end_aspect.
