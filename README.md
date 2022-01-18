@@ -129,16 +129,17 @@ translates into:
 send_message(Object, some_method(Parameter1, Parameter2))
 ```
 
-The actual `send_message` predicate (internal to the `aop` library and not intended to be overwritten or extended with new clauses) attempts to efficiently locate a suitable clause for the method. The basic mechanics involve translating `some_method(Parameter1, Parameter2)` into an equivalent goal with 2 additional parameters in first position: `some_method(Aspect, Object, Parameter1, Parameter2`, and then searching for a module that contains such clauses with that in its head.
+The actual `send_message` predicate (internal to the `aop` library and not intended to be overwritten or extended with new clauses) attempts to efficiently locate a suitable clause for the method. The basic mechanics involve translating `some_method(Parameter1, Parameter2)` into an equivalent goal with 1 additional parameters in first position: `perform_method(Object, some_method(Parameter1, Parameter2))`, where `Object` was the original receiver in `send_message`. The reason for these semantics is two-fold:
+
+  1. Use of messages is basically orthogonal to the module system, so preserving module affinities is not as relevant.
+  2. SWI-Prolog has efficient method dispatching, which can overtime optimize many kinds of message dispatches.
 
 For example, if the `some_method` definition originally appears in a `some_aspect` aspect declaration which also contains a `some_object(Foo)` declaration, then `send_message` will eventually find this clause:
 
 ```prolog
-some_method(some_aspect, some_object(Foo), Parameter1, Parameter2) :-
+perform_method(some_object(Foo), some_method(Parameter1, Parameter2)) :-
   <body of clause goes here per usual>.
 ```
-
-In fact, running `listing(some_method)` will in fact show relevant clauses such as the above. 
 
 ## Modules and Aspects
 
@@ -178,5 +179,5 @@ Available methods with analogous meanings as the base prolog definitions, but sc
 * `asserta/2`
 * `assertz/1`
 * `assertz/2`
-* `retract/1.
+* `retract/1.`
 * `retractall/1`
