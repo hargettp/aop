@@ -16,11 +16,6 @@
 % Runtime support
 % 
 
-% perform_method(Object, Message)
-:- dynamic aop:perform_method/2.
-:- discontiguous aop:perform_method/2.
-:- multifile aop:perform_method/2.
-
 % Events -- on(Listener, EventType, Object, Message),
 % where EventType is before or after
 :- dynamic aop:on/5.
@@ -88,14 +83,15 @@ to(Left, Right, Result) :-
 ::(Object, Message, Extra1, Extra2) :- send_message(Object, Message, Extra1, Extra2).
 
 send_message(Object, Message) :-
-  ( extended(_Aspect, Object, Message)
+  find_method(Aspect, Object, Message, Module, ExtendedMessage),
+  ( extended(Aspect, Object, Message)
     -> (
       before(Object, Message),
       % run it
-      aop:perform_method(Object, Message),
+      Module:ExtendedMessage,
       after(Object, Message)
       )  % run it
-    ; aop:perform_method(Object, Message)
+    ; Module:ExtendedMessage
     ).
 
 send_message(Object, Message, ExtraArg) :-
