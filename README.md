@@ -147,6 +147,8 @@ Because methods for a given object may be implemented in many different aspects 
 
 For modules that define aspects, its usually a good idea to name the module after the aspect: for example, if the aspect is `some_aspect(Foo)` then a good convention is to name the module `some_aspect`. When multiple source files (and thus multiple modules) are necessary to fully implement an aspect, then sub-modules loadable with `use_module(some_aspect/internals`) can have the module name `some_aspect_internals`.
 
+Note that objects themselves provide an alternative to modules for creating a modular application. Because each object essentially defines a namespace for dispatching methods, then objects themselves can be used to create logical boundaries between units of code. For example, one can easily add common routines for manipulating lists to a `lists` object, thus placing such routines in a logical module.
+
 ## Reflection
 
 For situations where introspection of the aspects, objects, and methods available in an application, `aop` defines several predicates and common methods available universally. 
