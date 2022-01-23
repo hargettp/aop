@@ -16,6 +16,11 @@
 % Runtime support
 % 
 
+% do(Object, Message)
+:- dynamic aop:do/2.
+:- discontiguous aop:do/2.
+:- multifile aop:do/2.
+
 % Events -- on(Listener, EventType, Object, Message),
 % where EventType is before or after
 :- dynamic aop:on/5.
@@ -83,18 +88,14 @@ to(Left, Right, Result) :-
 ::(Object, Message, Extra1, Extra2) :- send_message(Object, Message, Extra1, Extra2).
 
 send_message(Object, Message) :-
-  % Inlining this expression for performance
-  % extend([Aspect, Object], Message, ExtendedMessage),
-  Message =.. [MethodName | Args],
-  ExtendedMessage =.. [MethodName, Aspect, Object | Args],
-  ( extended(Aspect, Object, Message)
+  ( extended(_Aspect, Object, Message)
     -> (
       before(Object, Message),
       % run it
-      aop_rt:ExtendedMessage,
+      aop:do(Object, Message),
       after(Object, Message)
       )  % run it
-    ; aop_rt:ExtendedMessage
+    ; aop:do(Object, Message)
     ).
 
 send_message(Object, Message, ExtraArg) :-
@@ -117,6 +118,19 @@ extended(Aspect, Object, Message) :-
 before(Object, Message) :-
   trigger_method_events(Object, before, Message),
   invoke_method_actions(Object, before, Message).
+
+find_method(Aspect, Object, Message, Module, ExtendedMessage) :-
+  extend([Aspect, Object], Message, ExtendedMessage),
+  functor(ExtendedMessage, Name, Arity),
+  find_predicate(Aspect, Module, Name, Arity).
+
+:- table find_predicate/4.
+find_predicate(Aspect, Module, Name, Arity) :-
+  current_enabled_aspect(Aspect, Module),
+  % check its a viable predicate -- if not, will
+  % likely backtrack into assuming a built-in predicate
+  current_predicate(Module:Name/Arity).
+
 
 after(Object, Message) :-
   trigger_method_events(Object, after, Message),

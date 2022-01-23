@@ -127,7 +127,7 @@ term_expansion(::at(This,EventType,Object,Message) :- Body, [
 % Rule -- ::foo(This, bar) :- baz.
 % expand_object_declaration(Aspect, Object, (::Message :- Body), [
 term_expansion(::Message :- Body, [
-    aop_rt:ExtendedMessage :- ExtendedBody |
+    aop:do(Object, ContractedMessage) :- ExtendedBody |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -139,14 +139,13 @@ term_expansion(::Message :- Body, [
   % We need to check "this" against the object, to ensure
   % there is a match for the method
   arg(1,Message,This),
-  extend([Aspect, Object], ContractedMessage, ExtendedMessage),
   prolog_load_context(module, Module),
   ExtendedBody = (This = Object, Body),
   method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
 
 % Fact -- ::foo(This, bar)
 term_expansion(::Message, [
-    aop_rt:ExtendedMessage :- ExtendedBody |
+    aop:do(Object, ContractedMessage) :- ExtendedBody |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -158,7 +157,6 @@ term_expansion(::Message, [
   % We need to check "this" against the object, to ensure
   % there is a match for the method
   arg(1,Message,This),
-  extend([Aspect, Object], ContractedMessage, ExtendedMessage),
   prolog_load_context(module, Module),
   ExtendedBody = (This = Object),
   method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
@@ -166,21 +164,20 @@ term_expansion(::Message, [
 % Rule -- foo(bar) :- baz.
 % expand_object_declaration(Aspect, Object, (Message :- Body), [
 term_expansion((Message :- Body), [
-    aop_rt:ExtendedMessage :- Body |
+    aop:do(Object, Message) :- Body |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
   aop_load_context(aspect, Aspect),
   functor(Message,Name, MethodArity),
   PredicateArity is MethodArity + 2,
-  extend([Aspect, Object], Message, ExtendedMessage),
   prolog_load_context(module, Module),
   method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
 
 % Fact -- foo(bar)
 % expand_object_declaration(Aspect, Object, Message, [
 term_expansion(Message, [
-    aop_rt:ExtendedMessage |
+    aop:do(Object, Message) |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -190,21 +187,19 @@ term_expansion(Message, [
   aop_load_context(aspect, Aspect),
   functor(Message,Name,MethodArity),
   PredicateArity is MethodArity + 2,
-  extend([Aspect, Object], Message, ExtendedMessage),
   prolog_load_context(module, Module),
   method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity,  MethodExpansion).
 
 expand_accessors(_Aspect, _Object, [],[]).
 
 expand_accessors(Aspect, Object, [Accessor | Accessors], [
-   aop_rt:AccessorExpansion,
+   aop:do(Object, Accessor),
    MethodExpansion | AccessorExpansions
    ]) :-
   functor(Accessor,Name,MethodArity),
   PredicateArity is MethodArity + 2,
   method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion),
   prolog_load_context(module, Module),
-  extend([Aspect, Object], Accessor, AccessorExpansion),
   expand_accessors(Aspect, Object, Accessors, AccessorExpansions).
 
 method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion) :-
@@ -213,9 +208,9 @@ method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, Method
     ; (
       method_signature(Name, Signature, VariableNames),
       MethodExpansion = [
-        :- dynamic aop_rt:Name/PredicateArity,
-        :- multifile(aop_rt:Name/PredicateArity),
-        :- discontiguous(aop_rt:Name/PredicateArity),
+        :- dynamic Name/PredicateArity,
+        :- multifile(Name/PredicateArity),
+        :- discontiguous(Name/PredicateArity),
         aop:method(Aspect, Object, Module:Name/MethodArity),
         aop:method_signature(Aspect, Object, Module:Name/MethodArity, Signature, VariableNames)
         ]

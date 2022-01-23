@@ -23,56 +23,40 @@
     % Rules -- asserta(Head :- Body, Ref)
     ::asserta(This, (Head :- Body), Ref) :- 
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Head, Extended),
-      aop_rt:asserta( (Extended :- Body), Ref ).
+      asserta( (aop:do(This, Head) :- Body), Ref ).
 
     % Facts -- asserta(Fact, Ref)
     ::asserta(This, Fact, Ref) :-
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Fact, Extended),
-      aop_rt:asserta( Extended, Ref ).
+      asserta( aop:do(This, Fact), Ref ).
 
     ::assertz(This,Assertion) :- This::assertz(Assertion, _Ref).
 
     % Rules -- assertz(Head :- Body)
     ::assertz(This, (Head :- Body), Ref) :- 
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Head, Extended),
-      aop_rt:assertz( (Extended :- Body), Ref ).
+      assertz( (aop:do(This, Head) :- Body), Ref ).
 
     % Facts -- assertz(Fact, Ref)
     ::assertz(This, Fact, Ref) :-
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Fact, Extended),
-      aop_rt:assertz( Extended, Ref ).
+      assertz( aop:do(This, Fact), Ref ).
 
     ::retract(This, Head :- Body) :-
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Head, ExtendedHead),
-      aop_rt:retract(ExtendedHead :- Body).
+      retract(aop:do(This, Head) :- Body).
 
     ::retract(This, Body) :-
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Body, ExtendedBody),
-      aop_rt:retract(ExtendedBody).
+      retract(aop:do(This, Body)).
 
     ::retractall(This, Head :- Body) :-
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Head, ExtendedHead),
-      aop_rt:retractall(ExtendedHead :- Body).
+      retractall(aop:do(This, Head) :- Body).
 
     ::retractall(This, Body) :-
       !,
-      aop:object(Aspect, This, _Module),
-      extend([Aspect, This], Body, ExtendedBody),
-      aop_rt:retractall(ExtendedBody).
+      retractall(aop:do(This, Body)).
 
     :- end_object.
 
