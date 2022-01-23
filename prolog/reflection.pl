@@ -99,6 +99,43 @@
     ::ground(This) :-
       ground(This).
 
+    listing :-
+      ::listing(_).
+
+    listing(MethodName) :-
+      atom(MethodName),
+      !,
+      ::this(This),
+      findall(
+        Clause,
+        (
+          clause(aop:do(This, Method), Body),
+          functor(Method, MethodName, _Arity),
+          Clause = (This::Method :- Body)
+          ),
+        Clauses
+        ),
+      ::portray_method_clauses(Clauses).
+
+    listing(MethodPattern) :-
+      ::this(This),
+      findall(
+        Clause,
+        (
+          clause(aop:do(This, Method), Body),
+          MethodPattern = Method,
+          Clause = (This::Method :- Body)
+          ),
+        Clauses
+        ),
+      ::portray_method_clauses(Clauses).
+
+    portray_method_clauses(Clauses) :-
+      forall(
+        member(Clause, Clauses),
+        portray_clause(Clause)
+        ).
+
   :- end_object.
 
   :- new_object(aop:method(Aspect, Object, Module:Name/Arity),[
