@@ -17,9 +17,9 @@
 % 
 
 % do(Object, Message)
-:- dynamic aop:do/2.
-:- discontiguous aop:do/2.
-:- multifile aop:do/2.
+:- dynamic aop:do/3.
+:- discontiguous aop:do/3.
+:- multifile aop:do/3.
 
 % Events -- on(Listener, EventType, Object, Message),
 % where EventType is before or after
@@ -92,10 +92,10 @@ send_message(Object, Message) :-
     -> (
       before(Object, Message),
       % run it
-      aop:do(Object, Message),
+      aop:do(_, Object, Message),
       after(Object, Message)
       )  % run it
-    ; aop:do(Object, Message)
+    ; aop:do(_, Object, Message)
     ).
 
 send_message(Object, Message, ExtraArg) :-

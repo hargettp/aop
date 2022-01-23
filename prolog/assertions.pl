@@ -23,40 +23,40 @@
     % Rules -- asserta(Head :- Body, Ref)
     ::asserta(This, (Head :- Body), Ref) :- 
       !,
-      asserta( (aop:do(This, Head) :- Body), Ref ).
+      asserta( (aop:do(asserted, This, Head) :- Body), Ref ).
 
     % Facts -- asserta(Fact, Ref)
     ::asserta(This, Fact, Ref) :-
       !,
-      asserta( aop:do(This, Fact), Ref ).
+      asserta( aop:do(asserted, This, Fact), Ref ).
 
     ::assertz(This,Assertion) :- This::assertz(Assertion, _Ref).
 
     % Rules -- assertz(Head :- Body)
     ::assertz(This, (Head :- Body), Ref) :- 
       !,
-      assertz( (aop:do(This, Head) :- Body), Ref ).
+      assertz( (aop:do(asserted, This, Head) :- Body), Ref ).
 
     % Facts -- assertz(Fact, Ref)
     ::assertz(This, Fact, Ref) :-
       !,
-      assertz( aop:do(This, Fact), Ref ).
+      assertz( aop:do(asserted, This, Fact), Ref ).
 
     ::retract(This, Head :- Body) :-
       !,
-      retract(aop:do(This, Head) :- Body).
+      retract(aop:do(asserted, This, Head) :- Body).
 
     ::retract(This, Body) :-
       !,
-      retract(aop:do(This, Body)).
+      retract(aop:do(asserted, This, Body)).
 
     ::retractall(This, Head :- Body) :-
       !,
-      retractall(aop:do(This, Head) :- Body).
+      retractall(aop:do(asserted, This, Head) :- Body).
 
     ::retractall(This, Body) :-
       !,
-      retractall(aop:do(This, Body)).
+      retractall(aop:do(asserted, This, Body)).
 
     :- end_object.
 

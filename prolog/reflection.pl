@@ -109,9 +109,9 @@
       findall(
         Clause,
         (
-          clause(aop:do(This, Method), Body),
+          clause(aop:do(Aspect, This, Method), Body),
           functor(Method, MethodName, _Arity),
-          Clause = (This::Method :- Body)
+          Clause = [Aspect, (This::Method :- Body)]
           ),
         Clauses
         ),
@@ -122,9 +122,9 @@
       findall(
         Clause,
         (
-          clause(aop:do(This, Method), Body),
+          clause(aop:do(Aspect, This, Method), Body),
           MethodPattern = Method,
-          Clause = (This::Method :- Body)
+          Clause = [Aspect, (This::Method :- Body)]
           ),
         Clauses
         ),
@@ -132,8 +132,11 @@
 
     portray_method_clauses(Clauses) :-
       forall(
-        member(Clause, Clauses),
-        portray_clause(Clause)
+        member([Aspect, Clause], Clauses),
+        (
+          format('% Aspect ~w~n',Aspect),
+          portray_clause(Clause)
+          )
         ).
 
   :- end_object.

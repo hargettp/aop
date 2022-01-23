@@ -127,7 +127,7 @@ term_expansion(::at(This,EventType,Object,Message) :- Body, [
 % Rule -- ::foo(This, bar) :- baz.
 % expand_object_declaration(Aspect, Object, (::Message :- Body), [
 term_expansion(::Message :- Body, [
-    aop:do(Object, ContractedMessage) :- ExtendedBody |
+    aop:do(Aspect, Object, ContractedMessage) :- ExtendedBody |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -145,7 +145,7 @@ term_expansion(::Message :- Body, [
 
 % Fact -- ::foo(This, bar)
 term_expansion(::Message, [
-    aop:do(Object, ContractedMessage) :- ExtendedBody |
+    aop:do(Aspect, Object, ContractedMessage) :- ExtendedBody |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -164,7 +164,7 @@ term_expansion(::Message, [
 % Rule -- foo(bar) :- baz.
 % expand_object_declaration(Aspect, Object, (Message :- Body), [
 term_expansion((Message :- Body), [
-    aop:do(Object, Message) :- Body |
+    aop:do(Aspect, Object, Message) :- Body |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -177,7 +177,7 @@ term_expansion((Message :- Body), [
 % Fact -- foo(bar)
 % expand_object_declaration(Aspect, Object, Message, [
 term_expansion(Message, [
-    aop:do(Object, Message) |
+    aop:do(Aspect, Object, Message) |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -193,7 +193,7 @@ term_expansion(Message, [
 expand_accessors(_Aspect, _Object, [],[]).
 
 expand_accessors(Aspect, Object, [Accessor | Accessors], [
-   aop:do(Object, Accessor),
+   aop:do(Aspect, Object, Accessor),
    MethodExpansion | AccessorExpansions
    ]) :-
   functor(Accessor,Name,MethodArity),

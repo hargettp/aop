@@ -16,6 +16,30 @@ The `aop` library is not a complete implemention of AOP, but is instead an opini
 
 * Enabling / disabling aspects dynamically
 
+## Getting started
+
+This library is packaged as a SWI-Prolog _package_, and as such is easily installed from within the SWI-Prolog shell:
+
+```
+?- pack_install(aop).
+```
+
+Within your applications source, simply load the library as normal:
+
+```
+use_module(library(aop)).
+```
+
+Note due to defintion and use of `term_expansion` and `goal_expansion` in the library, you may receive these warnings when loading the library. They are harmless and have no other ill side effects:
+
+```
+...
+Warning:    Local definition of user:goal_expansion/2 overrides weak import from aop_dsl
+...
+Warning:    Local definition of user:term_expansion/2 overrides weak import from aop_dsl
+...
+```
+
 ## Philosophy of Design Choices
 
 Several principles guide the design choices in the `aop` library:
@@ -39,7 +63,7 @@ A typical source file might look something like this:
   ]).
 
 % Load this aop library
-:- use_module(library(aop/ifc)).
+:- use_module(library(aop)).
 
 % Starts definition of a new aspect.
 :- new_aspect(my_aspect).
@@ -129,7 +153,7 @@ translates into:
 send_message(Object, some_method(Parameter1, Parameter2))
 ```
 
-The actual `send_message` predicate (internal to the `aop` library and not intended to be overwritten or extended with new clauses) attempts to efficiently locate a suitable clause for the method. The basic mechanics involve translating `some_method(Parameter1, Parameter2)` into an equivalent goal with 1 additional parameters in first position: `aop:do(Object, some_method(Parameter1, Parameter2))`, where `Object` was the original receiver in `send_message`. The reason for these semantics is two-fold:
+The actual `send_message` predicate (internal to the `aop` library and not intended to be overwritten or extended with new clauses) attempts to efficiently locate a suitable clause for the method. The basic mechanics involve translating `some_method(Parameter1, Parameter2)` into an equivalent goal with 1 additional parameters in second position: `aop:do(Aspect, Object, some_method(Parameter1, Parameter2))`, where `Object` was the original receiver in `send_message`. The reason for these semantics is two-fold:
 
   1. Use of messages is basically orthogonal to the module system, so preserving module affinities is not as relevant.
   2. SWI-Prolog has efficient method dispatching, which can overtime optimize many kinds of message dispatches.
@@ -137,7 +161,7 @@ The actual `send_message` predicate (internal to the `aop` library and not inten
 For example, if the `some_method` definition originally appears in a `some_aspect` aspect declaration which also contains a `some_object(Foo)` declaration, then `send_message` will eventually find this clause:
 
 ```prolog
-aop:do(some_object(Foo), some_method(Parameter1, Parameter2)) :-
+aop:do(some_aspect, some_object(Foo), some_method(Parameter1, Parameter2)) :-
   <body of clause goes here per usual>.
 ```
 
