@@ -55,8 +55,11 @@ end_object :-
 
 term_expansion(:- new_aspect(Aspect),[
   aop:aspect(Aspect),
-  aop:aspect_enabled(Aspect,true) | InAspectExpansions
+  aop:aspect_enabled(Aspect,true),
+  aop:aspect_event_queue(Aspect, Queue, Thread) | InAspectExpansions
   ]) :-
+  format(atom(Queue), '~w_aspect_events',[Aspect]),
+  format(atom(Thread),'~w_aspect_event_dispatcher',[Aspect]),
   term_expansion(:- in_aspect(Aspect), InAspectExpansions).
 
 term_expansion(:- in_aspect(Aspect), [
@@ -114,7 +117,8 @@ term_expansion(::on(This,EventType,Object,Message) :- Body, [
     (aop:on(Aspect, This, EventType, Object, Message) :- Body)
     ]) :-
   aop_load_context(object, This),
-  aop_load_context(aspect, Aspect).
+  aop_load_context(aspect, Aspect),
+  start_aspect_event_dispatcher(Aspect).
 
 % Events -- ::at(This, EventType, Object, Message) :- baz.
 % expand_object_declaration(Aspect, This, (::at(This,EventType,Object,Message) :- Body), [

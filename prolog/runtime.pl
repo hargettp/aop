@@ -6,11 +6,14 @@
 
   op(950, yfx, to),
   (to)/2,
-  (to)/3
+  (to)/3,
+
+  start_aspect_event_dispatcher/1
   ]).
 
 :- use_module('./helpers').
 :- use_module('./inspection').
+:- use_module(library(prolog_stack)).
 
 % 
 % Runtime support
@@ -26,6 +29,18 @@
 :- dynamic aop:on/5.
 :- discontiguous aop:on/5.
 :- multifile aop:on/5.
+
+% For name of queue for aspect events
+% aop:aspect_event_queue(Aspect, Queue, DispatcherThread)
+:- dynamic aop:aspect_event_queue/3.
+:- discontiguous aop:aspect_event_queue/3.
+:- multifile aop:aspect_event_queue/3.
+
+% If true, then event dispatcher started
+% aop:aspect_events_started(Aspect).
+:- dynamic aop:aspect_events_started/1.
+:- discontiguous aop:aspect_events_started/1.
+:- multifile aop:aspect_events_started/1.
 
 % Actions -- at(Listener, ActionType, Object, Message),
 % where ActionType is before or after
@@ -143,7 +158,10 @@ trigger_method_events(Object, EventType, Message) :-
     [Aspect, Listener, Object, Message], 
     ( 
       current_enabled_aspect(Aspect),
-      aop:on(Aspect, Listener, EventType, Object, Message) 
+      % aop:on(Aspect, Listener, EventType, Object, Message) 
+      Event = aop:on(Aspect, Listener, EventType, Object, Message) ,
+      clause(Event, _),
+      post_aspect_event(Aspect, Event)
     ), 
     _
     ),
@@ -160,3 +178,41 @@ invoke_method_actions(Object, EventType, Message) :-
     ),
     !.
 
+start_aspect_event_dispatcher(Aspect) :-
+  aop:aspect_event_queue(Aspect, Queue, Thread),
+  (aop:aspect_events_started(Aspect)
+    -> true
+    ; (
+      message_queue_create(_Queue, [alias(Queue)]),
+      thread_create(
+        dispatch_aspect_events(Aspect, Queue), 
+        _Id, 
+        [alias(Thread), detatched(true)]
+        ),
+      assertz(aop:aspect_events_started(Aspect))        
+      )
+    ).  
+
+post_aspect_event(Aspect, Event) :-
+  aop:aspect_event_queue(Aspect, Queue, _Thread),
+  thread_send_message(Queue, Event),
+  !.
+
+dispatch_aspect_events(Aspect, Queue) :-
+  thread_get_message(Queue, Event),
+  % only process events of this type
+  ( Event = aop:on(Aspect, _Listener, _EventType, _Object, _Message)
+    -> (
+      % Only process events if aspect enabled
+      current_enabled_aspect(Aspect)
+        -> catch_with_backtrace(
+          Event,
+          Error,
+          print_message(error, Error)
+          )
+        ; true
+        )
+    ; true
+    ),
+  dispatch_aspect_events(Aspect, Queue).
+  
