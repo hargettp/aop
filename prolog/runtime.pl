@@ -83,15 +83,16 @@ to(Left, Right, Result) :-
 ::(Object, Message, Extra1, Extra2) :- send_message(Object, Message, Extra1, Extra2).
 
 send_message(Object, Message) :-
-  find_method(Aspect, Object, Message, Module, ExtendedMessage),
+  % find_method(Aspect, Object, Message, Module, ExtendedMessage),
+  extend([Aspect, Object], Message, ExtendedMessage),
   ( extended(Aspect, Object, Message)
     -> (
       before(Object, Message),
       % run it
-      Module:ExtendedMessage,
+      aop_rt:ExtendedMessage,
       after(Object, Message)
       )  % run it
-    ; Module:ExtendedMessage
+    ; aop_rt:ExtendedMessage
     ).
 
 send_message(Object, Message, ExtraArg) :-

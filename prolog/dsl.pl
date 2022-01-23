@@ -127,7 +127,7 @@ term_expansion(::at(This,EventType,Object,Message) :- Body, [
 % Rule -- ::foo(This, bar) :- baz.
 % expand_object_declaration(Aspect, Object, (::Message :- Body), [
 term_expansion(::Message :- Body, [
-    Module:ExtendedMessage :- ExtendedBody |
+    aop_rt:ExtendedMessage :- ExtendedBody |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -146,7 +146,7 @@ term_expansion(::Message :- Body, [
 
 % Fact -- ::foo(This, bar)
 term_expansion(::Message, [
-    Module:ExtendedMessage :- ExtendedBody |
+    aop_rt:ExtendedMessage :- ExtendedBody |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -166,7 +166,7 @@ term_expansion(::Message, [
 % Rule -- foo(bar) :- baz.
 % expand_object_declaration(Aspect, Object, (Message :- Body), [
 term_expansion((Message :- Body), [
-    Module:ExtendedMessage :- Body |
+    aop_rt:ExtendedMessage :- Body |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -180,7 +180,7 @@ term_expansion((Message :- Body), [
 % Fact -- foo(bar)
 % expand_object_declaration(Aspect, Object, Message, [
 term_expansion(Message, [
-    Module:ExtendedMessage |
+    aop_rt:ExtendedMessage |
     MethodExpansion
     ]) :-
   aop_load_context(object, Object),
@@ -197,7 +197,7 @@ term_expansion(Message, [
 expand_accessors(_Aspect, _Object, [],[]).
 
 expand_accessors(Aspect, Object, [Accessor | Accessors], [
-   Module:AccessorExpansion,
+   aop_rt:AccessorExpansion,
    MethodExpansion | AccessorExpansions
    ]) :-
   functor(Accessor,Name,MethodArity),
@@ -213,9 +213,9 @@ method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, Method
     ; (
       method_signature(Name, Signature, VariableNames),
       MethodExpansion = [
-        :- dynamic Name/PredicateArity,
-        :- multifile(Name/PredicateArity),
-        :- discontiguous(Name/PredicateArity),
+        :- dynamic aop_rt:Name/PredicateArity,
+        :- multifile(aop_rt:Name/PredicateArity),
+        :- discontiguous(aop_rt:Name/PredicateArity),
         aop:method(Aspect, Object, Module:Name/MethodArity),
         aop:method_signature(Aspect, Object, Module:Name/MethodArity, Signature, VariableNames)
         ]

@@ -129,23 +129,25 @@ translates into:
 send_message(Object, some_method(Parameter1, Parameter2))
 ```
 
-The actual `send_message` predicate (internal to the `aop` library and not intended to be overwritten or extended with new clauses) attempts to efficiently locate a suitable clause for the method. The basic mechanics involve translating `some_method(Parameter1, Parameter2)` into an equivalent goal with 1 additional parameters in first position: `perform_method(Object, some_method(Parameter1, Parameter2))`, where `Object` was the original receiver in `send_message`. The reason for these semantics is two-fold:
+The actual `send_message` predicate (internal to the `aop` library and not intended to be overwritten or extended with new clauses) attempts to efficiently locate a suitable clause for the method. The basic mechanics involve translating `some_method(Parameter1, Parameter2)` into an equivalent goal with 2 additional parameters in first position: `aop_rt:some_method(_Aspect, Object, Parameter1, Parameter2)`, where `Object` was the original receiver in `send_message`. The reason for these semantics is two-fold:
 
   1. Use of messages is basically orthogonal to the module system, so preserving module affinities is not as relevant.
-  2. SWI-Prolog has efficient method dispatching, which can overtime optimize many kinds of message dispatches.
+  2. SWI-Prolog has efficient predicate lookup, which can over time optimize many kinds of message dispatches.
 
 For example, if the `some_method` definition originally appears in a `some_aspect` aspect declaration which also contains a `some_object(Foo)` declaration, then `send_message` will eventually find this clause:
 
 ```prolog
-perform_method(some_object(Foo), some_method(Parameter1, Parameter2)) :-
+aop_rt:some_method(some_aspect, some_object(Foo), Parameter1, Parameter2) :-
   <body of clause goes here per usual>.
 ```
 
 ## Modules and Aspects
 
-Because methods for a given object may be implemented in many different aspects (that's the point of the AOP style), modules take on a little less meaning in an AOP code, as imports and exports of methods no longer apply to objects, aspects, or methods: methods are essentially "global" to the object for which they are defined. Aspects and objects are global to the application that has loaded them. Structuring code in modules is still recommended, as much of the source code loading machinery of Prolog leverages it, and it will help with interfacing to traditional, non-AOP Prolog code.
+Because methods for a given object may be implemented in many different aspects (that's the point of the AOP style), modules take on a little less meaning in an AOP code, as imports and exports of methods no longer apply to objects, aspects, or methods: methods are essentially "global" to the object for which they are defined. It's because of this that methods are defined in a single global module (`aop_rt`). Aspects and objects are global to the application that has loaded them. Structuring code in modules is still recommended, as much of the source code loading machinery of Prolog leverages it, and it will help with interfacing to traditional, non-AOP Prolog code.
 
 For modules that define aspects, its usually a good idea to name the module after the aspect: for example, if the aspect is `some_aspect(Foo)` then a good convention is to name the module `some_aspect`. When multiple source files (and thus multiple modules) are necessary to fully implement an aspect, then sub-modules loadable with `use_module(some_aspect/internals`) can have the module name `some_aspect_internals`.
+
+Note that objects themselves provide an alternative to modules for creating a modular application. Because each object essentially defines a namespace for dispatching methods, then objects themselves can be used to "modularaize" an application. For example, common routines for manipulating lists can easily be added to a `lists` object, thus placing such routines in a logic module.
 
 ## Reflection
 

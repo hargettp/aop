@@ -23,56 +23,56 @@
     % Rules -- asserta(Head :- Body, Ref)
     ::asserta(This, (Head :- Body), Ref) :- 
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Head, Extended),
-      Module:asserta( (Extended :- Body), Ref ).
+      aop_rt:asserta( (Extended :- Body), Ref ).
 
     % Facts -- asserta(Fact, Ref)
     ::asserta(This, Fact, Ref) :-
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Fact, Extended),
-      Module:asserta( Extended, Ref ).
+      aop_rt:asserta( Extended, Ref ).
 
     ::assertz(This,Assertion) :- This::assertz(Assertion, _Ref).
 
     % Rules -- assertz(Head :- Body)
     ::assertz(This, (Head :- Body), Ref) :- 
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Head, Extended),
-      Module:assertz( (Extended :- Body), Ref ).
+      aop_rt:assertz( (Extended :- Body), Ref ).
 
     % Facts -- assertz(Fact, Ref)
     ::assertz(This, Fact, Ref) :-
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Fact, Extended),
-      Module:assertz( Extended, Ref ).
+      aop_rt:assertz( Extended, Ref ).
 
     ::retract(This, Head :- Body) :-
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Head, ExtendedHead),
-      Module:retract(ExtendedHead :- Body).
+      aop_rt:retract(ExtendedHead :- Body).
 
     ::retract(This, Body) :-
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Body, ExtendedBody),
-      Module:retract(ExtendedBody).
+      aop_rt:retract(ExtendedBody).
 
     ::retractall(This, Head :- Body) :-
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Head, ExtendedHead),
-      Module:retractall(ExtendedHead :- Body).
+      aop_rt:retractall(ExtendedHead :- Body).
 
     ::retractall(This, Body) :-
       !,
-      aop:object(Aspect, This, Module),
+      aop:object(Aspect, This, _Module),
       extend([Aspect, This], Body, ExtendedBody),
-      Module:retractall(ExtendedBody).
+      aop_rt:retractall(ExtendedBody).
 
     :- end_object.
 
