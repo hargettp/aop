@@ -134,7 +134,7 @@
       forall(
         member([Aspect, Clause], Clauses),
         (
-          format('% Aspect ~w~n',Aspect),
+          format('~n% Aspect ~w~n',Aspect),
           portray_clause(Clause)
           )
         ).
