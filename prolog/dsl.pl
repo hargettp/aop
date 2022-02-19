@@ -144,7 +144,7 @@ term_expansion(::Message :- Body, [
   % there is a match for the method
   arg(1,Message,This),
   prolog_load_context(module, Module),
-  ExtendedBody = (This = Object, Body),
+  ExtendedBody = (This = Object, current_enabled_aspect(Aspect), Body),
   method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
 
 % Fact -- ::foo(This, bar)
