@@ -9,8 +9,4 @@ RUN apt-get update \
 RUN sudo apt-add-repository -y -u ppa:swi-prolog/stable
 RUN sudo apt-get install -y swi-prolog
 USER vscode
-RUN swipl -g "pack_install( log4p,[interactive(false)] ), halt" \
-    && swipl -g "pack_install( aop,[interactive(false)] ), halt" \
-    && swipl -g "pack_install( markdown,[interactive(false)] ), halt" \
-    && swipl -g "pack_install( simple_template,[interactive(false)] ), halt" \
-    && swipl -g "pack_install( prosqlite,[interactive(false)] ), halt"
+RUN swipl -g "pack_install( log4p,[interactive(false)] ), halt"
