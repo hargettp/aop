@@ -1,8 +1,6 @@
 :- module(aop_docs,[
   ]).
 
-:- use_module(library(stringutils)).
-
 :- use_module('./internal').
 :- use_module('./context').
 
