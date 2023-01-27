@@ -214,7 +214,7 @@ method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, Method
       MethodExpansion = [
         :- dynamic Name/PredicateArity,
         :- multifile(Name/PredicateArity),
-        :- discontiguous(Name/PredicateArity),
+        :- multifile(Name/PredicateArity),
         aop:method(Aspect, Object, Module:Name/MethodArity),
         aop:method_signature(Aspect, Object, Module:Name/MethodArity, Signature, VariableNames)
         ]

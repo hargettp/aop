@@ -39,17 +39,17 @@
 
 % method(Aspect, Object, Message)
 :- dynamic(aop:method/3).
-:- discontiguous(aop:method/3).
+:- multifile(aop:method/3).
 :- multifile(aop:method/3).
 
 % method_signature(Aspect, Object, Name/MethodArity, Signature, VariableNames)
 :- dynamic(aop:method_signature/5).
-:- discontiguous(aop:method_signature/5).
+:- multifile(aop:method_signature/5).
 :- multifile(aop:method_signature/5).
 
 % extended(Aspect, Object, Name/MethodArity)
 :- dynamic(aop:extension/3).
-:- discontiguous(aop:extension/3).
+:- multifile(aop:extension/3).
 :- multifile(aop:extension/3).
 
 % Enable extensions (e.g., events and actions)
