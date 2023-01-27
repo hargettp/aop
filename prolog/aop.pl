@@ -5,6 +5,10 @@
 % Aspects are also loaded as modules
 user:file_search_path(aspect, './aspects').
 
+user:file_search_path(aspect, Path) :-
+  pack_property(_Package, directory(Directory)),
+  directory_file_path(Directory, aspects, Path).
+
 use_aspect(Base/Rest) :-
   use_aspect(Base),
   % format("Loading aspect from module ~w~n",[aspect(Base/Rest)]),

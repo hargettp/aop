@@ -15,4 +15,8 @@ test(default_enabled_aspects) :-
     [assertions, reflection]
     ).
 
+test(aspect_search_path) :-
+  user:file_search_path(aspect,'./aspects'),
+  !.
+
 :- end_tests(aop).
