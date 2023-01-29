@@ -9,6 +9,9 @@
   in_object/1,
   end_object/0,
 
+  term_expansion/2,
+  goal_expansion/2,
+
   op(650, fx, ::),
   (::)/1,
 
@@ -50,33 +53,33 @@ end_object :-
 % 
 % - - - - - - - - - - - - - - - - - - -
 
-user:term_expansion(:- new_aspect(Aspect),[
+term_expansion(:- new_aspect(Aspect),[
   aop:aspect(Aspect),
   aop:aspect_enabled(Aspect,true),
   aop:aspect_event_queue(Aspect, Queue, Thread) | InAspectExpansions
   ]) :-
   format(atom(Queue), '~w_aspect_events',[Aspect]),
   format(atom(Thread),'~w_aspect_event_dispatcher',[Aspect]),
-  user:term_expansion(:- in_aspect(Aspect), InAspectExpansions).
+  term_expansion(:- in_aspect(Aspect), InAspectExpansions).
 
-user:term_expansion(:- in_aspect(Aspect), [
+term_expansion(:- in_aspect(Aspect), [
   aop:aspect_module(Aspect, Module)
   ]) :-
   prolog_load_context(module, Module),
   aop_push_active_aspect(Aspect).
 
-user:term_expansion(:- new_object(Object), Expansion) :- 
-  user:term_expansion(:- new_object(Object,[]), Expansion).
+term_expansion(:- new_object(Object), Expansion) :- 
+  term_expansion(:- new_object(Object,[]), Expansion).
 
-user:term_expansion(:- new_object(Object, Accessors), Expansion) :-
+term_expansion(:- new_object(Object, Accessors), Expansion) :-
   aop_load_context(aspect, Aspect),
   prolog_load_context(module, Module),
   ObjectExpansion = aop:object(Aspect, Object, Module),
   expand_accessors(Aspect, Object, Accessors, AccessorExpansions),
-  user:term_expansion(:- in_object(Object), InObjectExpansion),
+  term_expansion(:- in_object(Object), InObjectExpansion),
   append([ObjectExpansion | AccessorExpansions], InObjectExpansion, Expansion).
 
-user:term_expansion(:- in_object(Object), Expansion) :-
+term_expansion(:- in_object(Object), Expansion) :-
   aop_load_context(aspect, Aspect),
   prolog_load_context(module, Module),
   Expansion = [
@@ -84,7 +87,7 @@ user:term_expansion(:- in_object(Object), Expansion) :-
   ],
   aop_push_active_object(Object).
 
-user:term_expansion(:- nested_object(Object), [ObjectExpansion]) :-
+term_expansion(:- nested_object(Object), [ObjectExpansion]) :-
   aop_load_context(object, Current),
   aop_load_context(aspect, Aspect),
   prolog_load_context(module, Module),
@@ -93,7 +96,7 @@ user:term_expansion(:- nested_object(Object), [ObjectExpansion]) :-
   ObjectExpansion = aop:object(Aspect, NestedObject, Module),
   aop_push_active_object(NestedObject).
 
-user:term_expansion(:- extension(Name/MethodArity), Expansion ) :-
+term_expansion(:- extension(Name/MethodArity), Expansion ) :-
     aop_load_context(object, Object),
     aop_load_context(aspect, Aspect),
     ( aop:extension(Aspect, Object, Name/MethodArity)  
@@ -101,7 +104,7 @@ user:term_expansion(:- extension(Name/MethodArity), Expansion ) :-
       ; Expansion = [aop:extension(Aspect, Object, Name/MethodArity)]
       ).
 
-user:term_expansion(:- method(Name/MethodArity), Expansion) :-
+term_expansion(:- method(Name/MethodArity), Expansion) :-
     aop_load_context(object, Object),
     aop_load_context(aspect, Aspect),
     PredicateArity is MethodArity + 2,
@@ -110,7 +113,7 @@ user:term_expansion(:- method(Name/MethodArity), Expansion) :-
 
 % Events -- ::on(This, EventType, Object, Message) :- baz.
 % expand_object_declaration(Aspect, This, (::on(This,EventType,Object,Message) :- Body), [
-user:term_expansion(::on(This,EventType,Object,Message) :- Body, [
+term_expansion(::on(This,EventType,Object,Message) :- Body, [
     (aop:on(Aspect, This, EventType, Object, Message) :- Body)
     ]) :-
   aop_load_context(object, This),
@@ -119,7 +122,7 @@ user:term_expansion(::on(This,EventType,Object,Message) :- Body, [
 
 % Events -- ::at(This, EventType, Object, Message) :- baz.
 % expand_object_declaration(Aspect, This, (::at(This,EventType,Object,Message) :- Body), [
-user:term_expansion(::at(This,EventType,Object,Message) :- Body, [
+term_expansion(::at(This,EventType,Object,Message) :- Body, [
     (aop:at(Aspect, This, EventType, Object, Message) :- Body)
     ]) :-
   aop_load_context(object, This),
@@ -127,7 +130,7 @@ user:term_expansion(::at(This,EventType,Object,Message) :- Body, [
 
 % Rule -- ::foo(This, bar) :- baz.
 % expand_object_declaration(Aspect, Object, (::Message :- Body), [
-user:term_expansion(::Message :- Body, [
+term_expansion(::Message :- Body, [
     aop:do(Aspect, Object, ContractedMessage) :- ExtendedBody |
     MethodExpansion
     ]) :-
@@ -145,7 +148,7 @@ user:term_expansion(::Message :- Body, [
   method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
 
 % Fact -- ::foo(This, bar)
-user:term_expansion(::Message, [
+term_expansion(::Message, [
     aop:do(Aspect, Object, ContractedMessage) :- ExtendedBody |
     MethodExpansion
     ]) :-
@@ -164,7 +167,7 @@ user:term_expansion(::Message, [
 
 % Rule -- foo(bar) :- baz.
 % expand_object_declaration(Aspect, Object, (Message :- Body), [
-user:term_expansion((Message :- Body), [
+term_expansion((Message :- Body), [
     aop:do(Aspect, Object, Message) :- Body |
     MethodExpansion
     ]) :-
@@ -177,7 +180,7 @@ user:term_expansion((Message :- Body), [
 
 % Fact -- foo(bar)
 % expand_object_declaration(Aspect, Object, Message, [
-user:term_expansion(Message, [
+term_expansion(Message, [
     aop:do(Aspect, Object, Message) |
     MethodExpansion
     ]) :-
@@ -233,20 +236,20 @@ method_signature(Method, Signature, Names) :-
 
 % The idiom `::here(Here)` where `Here` can be any variable name
 % will bind the current aspect to that variable
-user:goal_expansion(::here(Here), Aspect = Here) :-
+goal_expansion(::here(Here), Aspect = Here) :-
   % This has to be done at compile time because the
   % context isn't availale at run time
   aop_load_context(aspect, Aspect).
 
 % Support messages to `This` object without
 % explicitly needing a `This` variable
-user:goal_expansion(::Message, Object::ExpandedMessage) :-
+goal_expansion(::Message, Object::ExpandedMessage) :-
   aop_load_context(object, Object),
   expand_goal(Message, ExpandedMessage).
 
 % Ensure that even nested terms are properly
 % expanded as well
-user:goal_expansion(Goal, ExpandedGoal) :-
+goal_expansion(Goal, ExpandedGoal) :-
   aop_load_context(object, _Object),
   Goal =.. [Name | Args],
   maplist(expand_goal, Args, ExpandedArgs),
