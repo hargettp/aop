@@ -1,0 +1,1 @@
+Note: this directory is here only for testing, as it has the expected for local or application-supplied aspects. It is not intended for re-use.
