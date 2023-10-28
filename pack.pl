@@ -1,6 +1,6 @@
 name(aop).
 title('Opinonated aspect-oriented programming for prolog').
-version('0.0.8').
+version('0.0.9').
 author('Phil Hargett','phil@haphazardhouse.net').
 maintainer('Phil Hargett', 'phil@haphazardhouse.net').
 packager('Phil Hargett', 'phil@haphazardhouse.net').
