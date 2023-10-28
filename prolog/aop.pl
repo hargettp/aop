@@ -4,6 +4,7 @@
 
 % Aspects are also loaded as modules
 user:file_search_path(aspect, './aspects').
+user:file_search_path(aspect, library(aspects)).
 
 use_aspect(Base/Rest) :-
   use_aspect(Base),
