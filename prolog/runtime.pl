@@ -21,31 +21,26 @@
 
 % do(Object, Message)
 :- dynamic aop:do/3.
-:- discontiguous aop:do/3.
 :- multifile aop:do/3.
 
 % Events -- on(Listener, EventType, Object, Message),
 % where EventType is before or after
 :- dynamic aop:on/5.
-:- discontiguous aop:on/5.
 :- multifile aop:on/5.
 
 % For name of queue for aspect events
 % aop:aspect_event_queue(Aspect, Queue, DispatcherThread)
 :- dynamic aop:aspect_event_queue/3.
-:- discontiguous aop:aspect_event_queue/3.
 :- multifile aop:aspect_event_queue/3.
 
 % If true, then event dispatcher started
 % aop:aspect_events_started(Aspect).
 :- dynamic aop:aspect_events_started/1.
-:- discontiguous aop:aspect_events_started/1.
 :- multifile aop:aspect_events_started/1.
 
 % Actions -- at(Listener, ActionType, Object, Message),
 % where ActionType is before or after
 :- dynamic aop:at/5.
-:- discontiguous aop:at/5.
 :- multifile aop:at/5.
 
 % 

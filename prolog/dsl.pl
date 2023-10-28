@@ -107,9 +107,8 @@ term_expansion(:- extension(Name/MethodArity), Expansion ) :-
 term_expansion(:- method(Name/MethodArity), Expansion) :-
     aop_load_context(object, Object),
     aop_load_context(aspect, Aspect),
-    PredicateArity is MethodArity + 2,
     prolog_load_context(module, Module),
-    method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, Expansion).
+    method_expansion(Aspect, Object, Module:Name/MethodArity, Expansion).
 
 % Events -- ::on(This, EventType, Object, Message) :- baz.
 % expand_object_declaration(Aspect, This, (::on(This,EventType,Object,Message) :- Body), [
@@ -138,14 +137,13 @@ term_expansion(::Message :- Body, [
   aop_load_context(aspect, Aspect),
   contract(Message, ContractedMessage),
   functor(Message, Name, Arity),
-  PredicateArity is Arity + 1,
   MethodArity is Arity - 1,
   % We need to check "this" against the object, to ensure
   % there is a match for the method
   arg(1,Message,This),
   prolog_load_context(module, Module),
   ExtendedBody = (This = Object, current_enabled_aspect(Aspect), Body),
-  method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
+  method_expansion(Aspect, Object, Module:Name/MethodArity, MethodExpansion).
 
 % Fact -- ::foo(This, bar)
 term_expansion(::Message, [
@@ -156,14 +154,13 @@ term_expansion(::Message, [
   aop_load_context(aspect, Aspect),
   contract(Message, ContractedMessage),
   functor(Message, Name, Arity),
-  PredicateArity is Arity + 1,
   MethodArity is Arity - 1,
   % We need to check "this" against the object, to ensure
   % there is a match for the method
   arg(1,Message,This),
   prolog_load_context(module, Module),
   ExtendedBody = (This = Object),
-  method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
+  method_expansion(Aspect, Object, Module:Name/MethodArity, MethodExpansion).
 
 % Rule -- foo(bar) :- baz.
 % expand_object_declaration(Aspect, Object, (Message :- Body), [
@@ -174,9 +171,8 @@ term_expansion((Message :- Body), [
   aop_load_context(object, Object),
   aop_load_context(aspect, Aspect),
   functor(Message,Name, MethodArity),
-  PredicateArity is MethodArity + 2,
   prolog_load_context(module, Module),
-  method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion).
+  method_expansion(Aspect, Object, Module:Name/MethodArity, MethodExpansion).
 
 % Fact -- foo(bar)
 % expand_object_declaration(Aspect, Object, Message, [
@@ -190,9 +186,8 @@ term_expansion(Message, [
   ( (functor(Message,Op,1),  current_op(_,_,Op) ) -> fail ; true),
   aop_load_context(aspect, Aspect),
   functor(Message,Name,MethodArity),
-  PredicateArity is MethodArity + 2,
   prolog_load_context(module, Module),
-  method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity,  MethodExpansion).
+  method_expansion(Aspect, Object, Module:Name/MethodArity,  MethodExpansion).
 
 expand_accessors(_Aspect, _Object, [],[]).
 
@@ -201,20 +196,16 @@ expand_accessors(Aspect, Object, [Accessor | Accessors], [
    MethodExpansion | AccessorExpansions
    ]) :-
   functor(Accessor,Name,MethodArity),
-  PredicateArity is MethodArity + 2,
-  method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion),
+  method_expansion(Aspect, Object, Module:Name/MethodArity, MethodExpansion),
   prolog_load_context(module, Module),
   expand_accessors(Aspect, Object, Accessors, AccessorExpansions).
 
-method_expansion(Aspect, Object, Module:Name/MethodArity, PredicateArity, MethodExpansion) :-
+method_expansion(Aspect, Object, Module:Name/MethodArity, MethodExpansion) :-
   aop:method(Aspect, Object, Module:Name/MethodArity)
     -> MethodExpansion = []
     ; (
       method_signature(Name, Signature, VariableNames),
       MethodExpansion = [
-        :- dynamic Name/PredicateArity,
-        :- multifile(Name/PredicateArity),
-        :- discontiguous(Name/PredicateArity),
         aop:method(Aspect, Object, Module:Name/MethodArity),
         aop:method_signature(Aspect, Object, Module:Name/MethodArity, Signature, VariableNames)
         ]
